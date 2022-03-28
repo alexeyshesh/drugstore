@@ -1,21 +1,25 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from app.models.customer import Customer
-from app.models.medicine import MedicineItem
+from app.models.medicine import MedicineItem, Medicine
+from app.models.courier import Courier
 
 
 @dataclass
 class Order:
+    delivery_time: timedelta
     ordered_at: datetime
     total_price: float
+    courier: Courier or None = None
 
 
 @dataclass
 class OrderedItem:
-    item: MedicineItem
+    medicine: Medicine
     order: Order
     customer: Customer
+    item: MedicineItem = None
 
 
 @dataclass

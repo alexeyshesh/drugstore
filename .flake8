@@ -1,0 +1,4 @@
+[flake8]
+max-line-length = 120
+ignore = H903, D203
+exclude = .git,.pytest_cache,venv

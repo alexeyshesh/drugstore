@@ -18,7 +18,7 @@ class Order:
 class OrderedItem:
     medicine: Medicine
     order: Order
-    customer: Customer
+    customer: Customer = None
     item: MedicineItem = None
 
 

@@ -29,7 +29,7 @@ class StorageController:
     def amount_of_medicine_in_stock(self, medicine_code: str):
         return len([
             item for item
-            in self.items
+            in self.items.values()
             if item.medicine.code == medicine_code
         ])
 

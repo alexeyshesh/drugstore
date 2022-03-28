@@ -1,7 +1,8 @@
+from app.ctl.provider import ProviderController
 from app.models.order import (
     Order,
     OrderedItem,
-    RegularOrderedMedicineItem
+    RegularOrderedMedicineItem,
 )
 
 from app.ctl.base import BaseController
@@ -20,11 +21,14 @@ class OrdersController(BaseController):
         for courier in couriers:
             courier_time_left = courier.working_hours
             while self.orders_queue:
+
                 order = self.orders_queue[0]
                 if self.order_in_stock(order):
                     if courier_time_left >= order.delivery_time:
                         courier_time_left -= order.delivery_time
+                        self.ordered_items = [item for item in self.ordered_items if item.order != order]
                         self.orders_queue.pop(0)  # потому что процесс доставки/приемки не моделируется
+
                     else:
                         break
 
@@ -40,6 +44,7 @@ class OrdersController(BaseController):
             else:
                 medicines_in_order[code] = 1
 
+        print(medicines_in_order)
         for code in medicines_in_order:
             if storage.amount_of_medicine_in_stock(code) < medicines_in_order[code]:
                 return False
@@ -78,5 +83,4 @@ class OrdersController(BaseController):
             if medicines_in_stock < medicines_in_queue[code]:
                 medicines_to_request[code] = medicines_in_queue[code] - medicines_in_stock
 
-        # TODO:
-        # ProviderController.request(medicines_to_request)
+        ProviderController().request(medicines_to_request)

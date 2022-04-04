@@ -1,8 +1,13 @@
 from datetime import date, timedelta
 
+import yaml
+
+from app.ctl.couriers import CouriersController
 from app.ctl.orders import OrdersController
 from app.ctl.storage import StorageController
 from app.exceptions import BadExperimentDateRange
+from app.models.medicine import Medicine
+from app.models.courier import Courier
 
 from app.experiment.config import ExperimentConfig
 
@@ -15,18 +20,59 @@ class ExperimentManager:
 
     def __init__(
         self,
-        medicines: list[dict],
+        medicines: list[Medicine],
+        couriers: list[Courier],
         margin: float,
-        couriers_amount: int,
         expiration_discount_days: int = 30,
         expiration_discount: float = 0.5,
     ):
         exp_conf = ExperimentConfig()
         exp_conf.medicines = medicines
         exp_conf.margin = margin
-        exp_conf.couriers_amount = couriers_amount
         exp_conf.expiration_discount_days = expiration_discount_days
         exp_conf.expiration_discount = expiration_discount
+
+        CouriersController().couriers = couriers
+
+    @classmethod
+    def from_yaml(
+        cls,
+        filename: str,
+        margin: float = None,
+        expiration_discount_days: int = None,
+        expiration_discount: float = None,
+    ):
+        with open(filename, 'r') as f:
+            try:
+                config_dict = yaml.safe_load(f)
+            except yaml.YAMLError:
+                raise
+
+        medicines = [
+            Medicine(name=med_name, **med_params)
+            for med_name, med_params in config_dict.get('medicines', {}).items()
+        ]
+        couriers = [
+            Courier(name=courier_name, working_hours=timedelta(hours=courier_params['working_hours']))
+            for courier_name, courier_params in config_dict.get('couriers', {}).items()
+        ]
+        margin = config_dict.get('margin', margin)
+        expiration_discount_days = config_dict.get(
+            'expiration_discount_days',
+            expiration_discount_days,
+        )
+        expiration_discount = config_dict.get(
+            'expiration_discount',
+            expiration_discount,
+        )
+
+        return cls(
+            medicines=medicines,
+            couriers=couriers,
+            margin=margin,
+            expiration_discount_days=expiration_discount_days,
+            expiration_discount=expiration_discount,
+        )
 
     def run(self, date_from: date, date_to: date):
         if date_from > date_to:

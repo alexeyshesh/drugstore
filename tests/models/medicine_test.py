@@ -22,7 +22,7 @@ def test_discount():
     )
 
     assert fresh_item.price == price
-    assert old_item.price == price / 2
+    assert old_item.price == price * ExperimentConfig().expiration_discount
 
 
 def test_barcode():

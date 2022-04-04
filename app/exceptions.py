@@ -13,3 +13,8 @@ class MedicineItemExpiredError(DrugstoreError):
 class MedicineNotFound(DrugstoreError):
     def __init__(self, medicine_item):
         super().__init__(f'There is no {medicine_item} in the storage')
+
+
+class BadExperimentDateRange(DrugstoreError):
+    def __init__(self):
+        super().__init__(f'date_to should be greater than date_from')

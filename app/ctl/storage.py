@@ -1,6 +1,8 @@
 from datetime import date
 
+from app.ctl.provider import ProviderController
 from app.exceptions import MedicineNotFound
+from app.experiment.config import ExperimentConfig
 from app.models.medicine import MedicineItem, Medicine
 
 
@@ -39,3 +41,9 @@ class StorageController:
             if item.expires_at >= date.today():
                 not_expired[barcode] = item
         self.items = not_expired
+
+    def accept_items_from_provider(self):
+        provider = ProviderController()
+        today = ExperimentConfig().cur_date
+        supply = provider.get_supply(today)
+        self.add(supply)

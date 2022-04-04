@@ -17,4 +17,4 @@ class MedicineNotFound(DrugstoreError):
 
 class BadExperimentDateRange(DrugstoreError):
     def __init__(self):
-        super().__init__(f'date_to should be greater than date_from')
+        super().__init__('date_to should be greater than date_from')

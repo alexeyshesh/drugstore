@@ -1,24 +1,24 @@
 from datetime import date, timedelta
 
-from app import config
+from app.experiment.config import ExperimentConfig
 
 from app.models.medicine import Medicine, MedicineItem
 from app.models.utils import BarcodeGenerator
 
 
 def test_discount():
-    config.EXPIRATION_DISCOUNT_TIMEDELTA = 10
+    ExperimentConfig().expiration_discount_days = 10
     price = 100
     med = Medicine('foo', 'bar', 100)
     fresh_item = MedicineItem(
         med,
         price,
-        date.today() + timedelta(config.EXPIRATION_DISCOUNT_TIMEDELTA + 1),
+        date.today() + timedelta(ExperimentConfig().expiration_discount_days + 1),
     )
     old_item = MedicineItem(
         med,
         price,
-        date.today() + timedelta(config.EXPIRATION_DISCOUNT_TIMEDELTA - 1),
+        date.today() + timedelta(ExperimentConfig().expiration_discount_days - 1),
     )
 
     assert fresh_item.price == price

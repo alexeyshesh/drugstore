@@ -52,12 +52,12 @@ def test_storage_pop(storage_items):
 def test_utilize_expired():
     StorageController.items = {}
 
-    med = Medicine('Но-шпа', 'NSH', 100)
+    med = Medicine('Но-шпа', 'NSH', 100, 100)
 
     items = [
-        MedicineItem(med, 100, date.today() - timedelta(5)),
-        MedicineItem(med, 100, date.today()),
-        MedicineItem(med, 100, date.today() + timedelta(5)),
+        MedicineItem(med, date.today() - timedelta(5)),
+        MedicineItem(med, date.today()),
+        MedicineItem(med, date.today() + timedelta(5)),
     ]
 
     s = StorageController()
@@ -72,12 +72,12 @@ def test_utilize_expired():
 def test_amount_of_medicine_in_stock():
     StorageController.items = {}
 
-    med = Medicine('Но-шпа', 'NSH', 100)
+    med = Medicine('Но-шпа', 'NSH', 100, 100)
 
     items = [
-        MedicineItem(med, 100, date.today() + timedelta(5)),
-        MedicineItem(med, 100, date.today()),
-        MedicineItem(med, 100, date.today() + timedelta(5)),
+        MedicineItem(med, date.today() + timedelta(5)),
+        MedicineItem(med, date.today()),
+        MedicineItem(med, date.today() + timedelta(5)),
     ]
 
     s = StorageController()

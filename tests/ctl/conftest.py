@@ -11,13 +11,13 @@ def storage_items():
     BarcodeGenerator._clear_cache()
 
     meds = [
-        Medicine('Но-шпа', 'NSH', 100),
-        Medicine('Витамин С', 'VTC', 10),
+        Medicine('Но-шпа', 'NSH', 100, 100),
+        Medicine('Витамин С', 'VTC', 200, 10),
     ]
     items = [
-        MedicineItem(meds[0], 100, date(2022, 3, 10)),
-        MedicineItem(meds[1], 100, date(2022, 4, 4)),
-        MedicineItem(meds[1], 100, date(2022, 4, 4)),
+        MedicineItem(meds[0], date(2022, 3, 10)),
+        MedicineItem(meds[1], date(2022, 4, 4)),
+        MedicineItem(meds[1], date(2022, 4, 4)),
     ]
 
     return items

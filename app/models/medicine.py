@@ -11,6 +11,7 @@ from app.models.utils import BarcodeGenerator
 class Medicine:
     name: str
     code: str
+    retail_price: float
     portion_size: int
     group: str = ''
     type: str = ''
@@ -19,7 +20,6 @@ class Medicine:
 @dataclass
 class MedicineItem:
     medicine: Medicine
-    retail_price: float
     expires_at: date
 
     def __post_init__(self):
@@ -30,8 +30,8 @@ class MedicineItem:
         if date.today() > self.expires_at:
             raise MedicineItemExpiredError(self)
         if date.today() + timedelta(ExperimentConfig().expiration_discount_days) >= self.expires_at:
-            return self.retail_price * ExperimentConfig().expiration_discount
-        return self.retail_price
+            return self.medicine.retail_price * ExperimentConfig().expiration_discount
+        return self.medicine.retail_price
 
     def __str__(self):
         return f'{self.medicine.name} [{self.barcode}]'

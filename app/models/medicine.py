@@ -13,6 +13,7 @@ class Medicine:
     code: str
     retail_price: float
     portion_size: int
+    demand_formula: str = '-price/5+40'
     group: str = ''
     type: str = ''
 

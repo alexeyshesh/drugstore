@@ -11,6 +11,7 @@ class Order:
     delivery_time: timedelta
     ordered_at: datetime
     total_price: float
+    customer: Customer = None
     courier: Courier or None = None
 
 
@@ -18,7 +19,6 @@ class Order:
 class OrderedItem:
     medicine: Medicine
     order: Order
-    customer: Customer = None
     item: MedicineItem = None
 
 

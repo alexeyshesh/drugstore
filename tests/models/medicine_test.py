@@ -9,15 +9,13 @@ from app.models.utils import BarcodeGenerator
 def test_discount():
     ExperimentConfig().expiration_discount_days = 10
     price = 100
-    med = Medicine('foo', 'bar', 100)
+    med = Medicine('foo', 'bar', 100, 100)
     fresh_item = MedicineItem(
         med,
-        price,
         date.today() + timedelta(ExperimentConfig().expiration_discount_days + 1),
     )
     old_item = MedicineItem(
         med,
-        price,
         date.today() + timedelta(ExperimentConfig().expiration_discount_days - 1),
     )
 
@@ -27,9 +25,9 @@ def test_discount():
 
 def test_barcode():
     BarcodeGenerator._clear_cache()
-    med = Medicine('foo', 'bar', 100)
+    med = Medicine('foo', 'bar', 100, 100)
     items = [
-        MedicineItem(med, 100, date.today() + timedelta(10))
+        MedicineItem(med, date.today() + timedelta(10))
         for _ in range(3)
     ]
 

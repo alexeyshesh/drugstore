@@ -20,6 +20,7 @@ def test_manager_from_yaml():
             'Ношпа': {
                 'code': 'NSP',
                 'portion_size': 100,
+                'retail_price': 100,
             },
         },
         'couriers': {
@@ -35,7 +36,7 @@ def test_manager_from_yaml():
 
     expected_init_data = {
         'medicines': [
-            Medicine(code='NSP', name='Ношпа', portion_size=100),
+            Medicine(code='NSP', name='Ношпа', retail_price=100, portion_size=100),
         ],
         'couriers': [
             Courier(name='Иван', working_hours=timedelta(hours=4)),

@@ -82,15 +82,15 @@ def test_distribute_orders_to_couriers_with_enough_time_of_many_couriers(storage
 
 def test_order_in_stock():
     meds = [
-        Medicine('foo', 'foo', 10),
-        Medicine('bar', 'bar', 9),
-        Medicine('xyz', 'xyz', 8),
+        Medicine('foo', 'foo', 100, 10),
+        Medicine('bar', 'bar', 200, 9),
+        Medicine('xyz', 'xyz', 300, 8),
     ]
 
     med_items = [
-        MedicineItem(meds[0], 100, date.today() + timedelta(100)),
-        MedicineItem(meds[0], 100, date.today() + timedelta(100)),
-        MedicineItem(meds[1], 200, date.today() + timedelta(100)),
+        MedicineItem(meds[0], date.today() + timedelta(100)),
+        MedicineItem(meds[0], date.today() + timedelta(100)),
+        MedicineItem(meds[1], date.today() + timedelta(100)),
     ]
 
     storage = StorageController()
@@ -126,15 +126,15 @@ def test_order_in_stock():
 
 def test_make_new_requests():
     meds = [
-        Medicine('foo', 'foo', 10),
-        Medicine('bar', 'bar', 9),
-        Medicine('xyz', 'xyz', 8),
+        Medicine('foo', 'foo', 100, 10),
+        Medicine('bar', 'bar', 100, 9),
+        Medicine('xyz', 'xyz', 100, 8),
     ]
 
     med_items = [
-        MedicineItem(meds[0], 100, date.today() + timedelta(100)),
-        MedicineItem(meds[0], 100, date.today() + timedelta(100)),
-        MedicineItem(meds[1], 200, date.today() + timedelta(100)),
+        MedicineItem(meds[0], date.today() + timedelta(100)),
+        MedicineItem(meds[0], date.today() + timedelta(100)),
+        MedicineItem(meds[1], date.today() + timedelta(100)),
     ]
 
     storage = StorageController()

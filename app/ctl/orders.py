@@ -20,17 +20,15 @@ class OrdersController(BaseController):
         couriers = CouriersController().couriers
         for courier in couriers:
             courier_time_left = courier.working_hours
-            while self.orders_queue:
+            orders_to_delete = []
+            for order in self.orders_queue:
+                if self.order_in_stock(order) and courier_time_left >= order.delivery_time:
+                    courier_time_left -= order.delivery_time
+                    self.ordered_items = [item for item in self.ordered_items if item.order != order]
+                    orders_to_delete.append(order)
 
-                order = self.orders_queue[0]
-                if self.order_in_stock(order):
-                    if courier_time_left >= order.delivery_time:
-                        courier_time_left -= order.delivery_time
-                        self.ordered_items = [item for item in self.ordered_items if item.order != order]
-                        self.orders_queue.pop(0)  # потому что процесс доставки/приемки не моделируется
-
-                    else:
-                        break
+            for order in orders_to_delete:
+                self.orders_queue.remove(order)  # потому что процесс доставки/приемки не моделируется
 
     def order_in_stock(self, order: Order) -> bool:
         ordered_items = self.get_ordered_items_by_order(order)
@@ -44,7 +42,6 @@ class OrdersController(BaseController):
             else:
                 medicines_in_order[code] = 1
 
-        print(medicines_in_order)
         for code in medicines_in_order:
             if storage.amount_of_medicine_in_stock(code) < medicines_in_order[code]:
                 return False

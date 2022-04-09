@@ -1,4 +1,5 @@
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
+from random import randint
 
 import yaml
 
@@ -6,10 +7,13 @@ from app.ctl.couriers import CouriersController
 from app.ctl.orders import OrdersController
 from app.ctl.storage import StorageController
 from app.exceptions import BadExperimentDateRange
+from app.factories.customer import CustomerFactory
 from app.models.medicine import Medicine
 from app.models.courier import Courier
 
 from app.experiment.config import ExperimentConfig
+from app.experiment.utils import shuffle, random_split
+from app.models.order import Order, OrderedItem
 
 
 class ExperimentManager:
@@ -31,6 +35,7 @@ class ExperimentManager:
         exp_conf.margin = margin
         exp_conf.expiration_discount_days = expiration_discount_days
         exp_conf.expiration_discount = expiration_discount
+        exp_conf.cur_date = date.today()
 
         CouriersController().couriers = couriers
 
@@ -88,5 +93,52 @@ class ExperimentManager:
         self.storage_ctl.accept_items_from_provider()
         self.orders_ctl.distribute_orders_to_couriers()
 
-        self.orders_ctl.accept_new_orders()
+        self.create_new_orders()
         self.orders_ctl.make_new_requests()
+
+    def create_new_orders(self):
+        """
+        TODO: Чтобы учесть тот факт, что цена уменьшается при истечении срока годности,
+              нужно сначала разбирать уцененные тоовары, а уже потом формировать остальные заказы
+        """
+        max_delivery_time_minutes = max(
+            [
+                int(courier.working_hours.seconds / 60)
+                for courier in CouriersController().couriers
+            ],
+        )
+
+        new_ordered_meds = []
+        for med in ExperimentConfig().medicines:
+            med: Medicine
+            # количество заказанных лекарств вычисляется по форммуле цена-спрос
+            # и умножается на случайный коэф-т от 0.8 до 1.1
+            new_ordered_meds_amount = int(
+                eval(
+                    med.demand_formula,
+                    {'price': med.retail_price * (1 + ExperimentConfig().margin)},
+                ) * (randint(80, 111) / 100),
+            )
+            new_ordered_meds.extend([med for _ in range(new_ordered_meds_amount)])
+
+        shuffle(new_ordered_meds)
+        customers_amount = int(len(new_ordered_meds) / randint(3, 6))
+        split_orders = random_split(new_ordered_meds, customers_amount)
+
+        new_orders = []
+        new_ordered_items = []
+        for raw_order in split_orders:
+            order = Order(
+                delivery_time=timedelta(minutes=randint(15, max_delivery_time_minutes)),
+                ordered_at=datetime.combine(ExperimentConfig().cur_date, time(hour=randint(10, 22))),
+                total_price=0,
+                customer=CustomerFactory(),
+            )
+            for med in raw_order:
+                new_ordered_items.append(OrderedItem(med, order))
+                order.total_price += med.retail_price * (1 + ExperimentConfig().margin)
+
+            new_orders.append(order)
+
+        OrdersController().orders_queue.extend(new_orders)
+        OrdersController().ordered_items.extend(new_ordered_items)

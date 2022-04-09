@@ -5,13 +5,13 @@ class ExperimentConfig:
 
     cur_date: date
     couriers_amount: int
-    margin: float
+    margin: float = 0.1
     expiration_discount_days: int = 30
     expiration_discount: float = 0.5
-    medicines: list
+    medicines: list = []
     code_to_medicine: dict = {}
     supply_size: int = 100
-    budget: float
+    budget: float = 100000
 
     __instance = None
 

@@ -1,4 +1,7 @@
-.PHONY: install tests flake
+.PHONY: install tests flake run
+
+run:
+	python3 manager.py
 
 tests:
 	coverage run -m pytest ./tests; make clean

@@ -29,6 +29,8 @@ def test_manager_from_yaml():
             },
         },
         'margin': 0.1,
+        'budget': 123000,
+        'supply_size': 200,
     }
 
     with patch('app.experiment.manager.yaml.safe_load', Mock(return_value=data)):
@@ -44,6 +46,8 @@ def test_manager_from_yaml():
         'margin': 0.1,
         'expiration_discount': 0.2,
         'expiration_discount_days': 20,
+        'budget': 123000,
+        'supply_size': 200,
     }
 
     assert mngr.inited_with == expected_init_data

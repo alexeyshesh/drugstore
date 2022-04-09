@@ -31,26 +31,24 @@ def test_storage_pop(storage_items):
     assert s.items == expected_items
 
 
-# Тест закомментирован, так как перестал работать с появлением новых тестов
-#
-# def test_storage_the_same_in_different_instances(storage_items):
-#     StorageController().items = {}
-#
-#     StorageController().add(storage_items)
-#     StorageController().pop(storage_items[0].barcode)
-#
-#     expected_items = {
-#         item.barcode: item
-#         for item in storage_items[1:]
-#     }
-#
-#     print(StorageController().items)
-#
-#     assert StorageController().items == expected_items
+def test_storage_the_same_in_different_instances(storage_items):
+    StorageController().items = {}
+
+    StorageController().add(storage_items)
+    StorageController().pop(storage_items[0].barcode)
+
+    expected_items = {
+        item.barcode: item
+        for item in storage_items[1:]
+    }
+
+    print(StorageController().items)
+
+    assert StorageController().items == expected_items
 
 
 def test_utilize_expired():
-    StorageController.items = {}
+    StorageController().items = {}
 
     med = Medicine('Но-шпа', 'NSH', 100, 100)
 
@@ -70,7 +68,7 @@ def test_utilize_expired():
 
 
 def test_amount_of_medicine_in_stock():
-    StorageController.items = {}
+    StorageController().items = {}
 
     med = Medicine('Но-шпа', 'NSH', 100, 100)
 

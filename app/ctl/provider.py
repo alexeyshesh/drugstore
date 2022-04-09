@@ -31,3 +31,6 @@ class ProviderController(BaseController):
             if self.requested_items[code] > 0:
                 self.create_supply(code)
                 self.requested_items[code] -= ExperimentConfig().supply_size
+                ExperimentConfig().budget -= (
+                    ExperimentConfig().supply_size * ExperimentConfig().code_to_medicine[code].retail_price
+                )

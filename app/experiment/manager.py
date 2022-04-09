@@ -31,7 +31,11 @@ class ExperimentManager:
         expiration_discount: float = 0.5,
     ):
         exp_conf = ExperimentConfig()
+
         exp_conf.medicines = medicines
+        for med in medicines:
+            exp_conf.code_to_medicine[med.code] = med
+
         exp_conf.margin = margin
         exp_conf.expiration_discount_days = expiration_discount_days
         exp_conf.expiration_discount = expiration_discount
@@ -80,11 +84,13 @@ class ExperimentManager:
         )
 
     def run(self, date_from: date, date_to: date):
+        print(ExperimentConfig().cur_date)
         if date_from > date_to:
             raise BadExperimentDateRange()
 
         ExperimentConfig().cur_date = date_from
-        for _ in range((date_to - date_from).days):
+        for i in range((date_to - date_from).days):
+            print(i)
             self._run_day()
             ExperimentConfig().cur_date += timedelta(1)
 

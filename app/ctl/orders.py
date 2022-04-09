@@ -80,4 +80,7 @@ class OrdersController(BaseController):
             if medicines_in_stock < medicines_in_queue[code]:
                 medicines_to_request[code] = medicines_in_queue[code] - medicines_in_stock
 
+        # поставщик отправляет товары партиями фиксированного размера,
+        # поэтому новая партия формируется только если в прошлой не хватает
+        # эта логика находится не в OrdersController, а в ProviderController
         ProviderController().request(medicines_to_request)

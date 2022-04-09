@@ -9,6 +9,9 @@ class ExperimentConfig:
     expiration_discount_days: int = 30
     expiration_discount: float = 0.5
     medicines: list
+    code_to_medicine: dict = {}
+    supply_size: int = 100
+    budget: float
 
     __instance = None
 

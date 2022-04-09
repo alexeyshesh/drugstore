@@ -1,4 +1,6 @@
 from app.ctl.provider import ProviderController
+from app.experiment.config import ExperimentConfig
+from app.models.medicine import MedicineItem
 from app.models.order import (
     Order,
     OrderedItem,
@@ -24,6 +26,9 @@ class OrdersController(BaseController):
             for order in self.orders_queue:
                 if self.order_in_stock(order) and courier_time_left >= order.delivery_time:
                     courier_time_left -= order.delivery_time
+                    items_to_deliver = self.pop_items_to_deliver(order)
+                    profit = sum(i.price for i in items_to_deliver)
+                    ExperimentConfig().budget += profit
                     self.ordered_items = [item for item in self.ordered_items if item.order != order]
                     orders_to_delete.append(order)
 
@@ -84,3 +89,17 @@ class OrdersController(BaseController):
         # поэтому новая партия формируется только если в прошлой не хватает
         # эта логика находится не в OrdersController, а в ProviderController
         ProviderController().request(medicines_to_request)
+
+    def count_profit(self, order: Order):
+        return sum(
+            item.item.price for item in self.ordered_items
+            if item.order == order
+        )
+
+    def pop_items_to_deliver(self, order: Order) -> list[MedicineItem]:
+        storage = StorageController()
+        return [
+            storage.pop_by_code(item.medicine.code)
+            for item in self.ordered_items
+            if item.order == order
+        ]

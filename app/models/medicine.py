@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import date, timedelta
+from functools import reduce
 
 from app.exceptions import MedicineItemExpiredError
 from app.experiment.config import ExperimentConfig
@@ -31,8 +32,17 @@ class MedicineItem:
         if date.today() > self.expires_at:
             raise MedicineItemExpiredError(self)
         if date.today() + timedelta(ExperimentConfig().expiration_discount_days) >= self.expires_at:
-            return self.medicine.retail_price * ExperimentConfig().expiration_discount
-        return self.medicine.retail_price
+            return reduce(
+                lambda x, y: x * y,
+                [
+                    self.medicine.retail_price,
+                    ExperimentConfig().expiration_discount,
+                    1 + ExperimentConfig().margin,
+                ],
+                1,
+            )
+
+        return self.medicine.retail_price * (1 + ExperimentConfig().margin)
 
     def __str__(self):
         return f'{self.medicine.name} [{self.barcode}]'

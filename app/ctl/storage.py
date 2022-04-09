@@ -1,23 +1,29 @@
 from datetime import date
 
+from app.ctl.base import BaseController
 from app.ctl.provider import ProviderController
 from app.exceptions import MedicineNotFound
 from app.experiment.config import ExperimentConfig
 from app.models.medicine import MedicineItem, Medicine
 
 
-class StorageController:
+class StorageController(BaseController):
 
-    items = {}  # type: dict[str: MedicineItem]
+    items = {}  # type: dict[str, MedicineItem]
 
     def add(self, items: list[MedicineItem]):
         for item in items:
             self.items[item.barcode] = item
 
-    def pop(self, barcode: str):
+    def pop(self, barcode: str) -> MedicineItem:
         if barcode not in self.items:
             raise MedicineNotFound(barcode)
         return self.items.pop(barcode)
+
+    def pop_by_code(self, code: str) -> MedicineItem:
+        for barcode, item in self.items.items():
+            if item.medicine.code == code:
+                return self.pop(barcode)
 
     def item_in_stock(self, item: MedicineItem) -> bool:
         return item.barcode in self.items

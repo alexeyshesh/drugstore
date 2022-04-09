@@ -29,6 +29,8 @@ class ExperimentManager:
         margin: float,
         expiration_discount_days: int = 30,
         expiration_discount: float = 0.5,
+        budget: float = 0,
+        supply_size: int = 100,
     ):
         exp_conf = ExperimentConfig()
 
@@ -37,9 +39,11 @@ class ExperimentManager:
             exp_conf.code_to_medicine[med.code] = med
 
         exp_conf.margin = margin
+        exp_conf.budget = budget
         exp_conf.expiration_discount_days = expiration_discount_days
         exp_conf.expiration_discount = expiration_discount
         exp_conf.cur_date = date.today()
+        exp_conf.supply_size = supply_size
 
         CouriersController().couriers = couriers
 
@@ -66,6 +70,8 @@ class ExperimentManager:
             for courier_name, courier_params in config_dict.get('couriers', {}).items()
         ]
         margin = config_dict.get('margin', margin)
+        budget = config_dict.get('budget', 0)
+        supply_size = config_dict.get('supply_size', 100)
         expiration_discount_days = config_dict.get(
             'expiration_discount_days',
             expiration_discount_days,
@@ -81,16 +87,16 @@ class ExperimentManager:
             margin=margin,
             expiration_discount_days=expiration_discount_days,
             expiration_discount=expiration_discount,
+            budget=budget,
+            supply_size=supply_size,
         )
 
     def run(self, date_from: date, date_to: date):
-        print(ExperimentConfig().cur_date)
         if date_from > date_to:
             raise BadExperimentDateRange()
 
         ExperimentConfig().cur_date = date_from
         for i in range((date_to - date_from).days):
-            print(i)
             self._run_day()
             ExperimentConfig().cur_date += timedelta(1)
 

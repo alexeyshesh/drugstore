@@ -19,8 +19,8 @@ def test_discount():
         date.today() + timedelta(ExperimentConfig().expiration_discount_days - 1),
     )
 
-    assert fresh_item.price == price
-    assert old_item.price == price * ExperimentConfig().expiration_discount
+    assert fresh_item.price == price * (1 + ExperimentConfig().margin)
+    assert old_item.price == price * ExperimentConfig().expiration_discount * (1 + ExperimentConfig().margin)
 
 
 def test_barcode():

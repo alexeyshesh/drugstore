@@ -4,6 +4,7 @@ from app.ctl.base import BaseController
 from app.ctl.provider import ProviderController
 from app.exceptions import MedicineNotFound
 from app.experiment.config import ExperimentConfig
+from app.experiment.logger import Logger
 from app.models.medicine import MedicineItem, Medicine
 
 
@@ -53,3 +54,11 @@ class StorageController(BaseController):
         today = ExperimentConfig().cur_date
         supply = provider.get_supply(today)
         self.add(supply)
+
+        if supply:
+            Logger().add(f'От поставщика пришло {len(supply)} штук лекарств!'
+                         f' ({", ".join(set([med.medicine.name for med in supply]))})')
+
+    @property
+    def total_price(self) -> float:
+        return sum(med.price for med in self.items.values())

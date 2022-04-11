@@ -11,7 +11,10 @@ class ExperimentConfig:
     medicines: list = []
     code_to_medicine: dict = {}
     supply_size: int = 100
-    budget: float = 100000
+    budget: float
+    start_budget: float
+    courier_salary: float
+    courier_salary_day: int = 20
 
     __instance = None
 

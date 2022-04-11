@@ -10,12 +10,9 @@ function showProgress(progress) {
 }
 
 eel.expose(showResults)
-function showResults(profit, ordersDelivered, ordersInProgress, storagePrice) {
-    document.getElementById('paramsView').style.display = 'none'
-    document.getElementById('progressView').style.display = 'none'
-    document.getElementById('resultsView').style.display = 'grid'
+function showResults(profit, ordersDelivered, ordersInProgress, storagePrice, logs) {
 
-    document.getElementById('profitValue').innerText = `${profit} ₽`
+    document.getElementById('profitValue').innerText = `${profit.toFixed(2)} ₽`
     if (profit > 0) {
         document.getElementById('profitValue').classList.remove('loss')
         document.getElementById('profitValue').classList.add('profit')
@@ -24,28 +21,34 @@ function showResults(profit, ordersDelivered, ordersInProgress, storagePrice) {
         document.getElementById('profitValue').classList.remove('profit')
     }
     document.getElementById('ordersDeliveredValue').innerText = `${ordersDelivered}`
-    document.getElementById('ordersInProgressValue').innerText = `${ordersInProgress}`
-    document.getElementById('storagePriceValue').innerText = `${storagePrice} ₽`
+    document.getElementById('ordersInProgressValue').innerText = `${ordersInProgress} дней`
+    document.getElementById('storagePriceValue').innerText = `${storagePrice.toFixed(2)} ₽`
+
+    printLogs(logs)
+
+    document.getElementById('paramsView').style.display = 'none'
+    document.getElementById('progressView').style.display = 'none'
+    document.getElementById('resultsView').style.display = 'grid'
 }
 
 eel.expose(printLogs)
 function printLogs(logs) {
     let newLogsContent = ''
-    for (let date in logs) {
+    for (let record of logs) {
         let logsList = ''
         logsList += `<div>`
-        logsList += `<h3>${date}</h3>`
-        for (let log of logs[date]) {
+        logsList += `<h3>${record.date}</h3>`
+        for (let log of record.logs) {
             logsList += `
                 <div>
                     <span>${log.msg}</span>
                     ${
                         log.profit > 0 ?
-                        `<b class="profit">+${log.profit}₽</b>`:
+                        `<b class="profit">+${log.profit.toFixed(2)}₽</b>`:
                         (
                             log.profit === 0 ?
                             `` :
-                            `<b class="loss">${log.profit}₽</b>`
+                            `<b class="loss">${log.profit.toFixed(2)}₽</b>`
                         )
                     }
                 </div>
@@ -176,6 +179,7 @@ function startModeling() {
         'supply_size': document.getElementById('supply_size').value,
         'couriers_amount': document.getElementById('couriers_amount').value,
         'working_hours': document.getElementById('working_hours').value,
+        'courier_salary': document.getElementById('salary').value,
         'medicines': medicines,
     }
     document.getElementById('paramsView').style.display = 'none'

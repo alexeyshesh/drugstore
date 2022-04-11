@@ -2,6 +2,9 @@ from datetime import date, timedelta
 
 import eel
 
+from app.ctl.storage import StorageController
+from app.experiment.config import ExperimentConfig
+from app.experiment.logger import Logger
 from app.experiment.manager import ExperimentManager
 from app.models.courier import Courier
 from app.models.medicine import Medicine
@@ -11,6 +14,7 @@ from app.models.medicine import Medicine
 def start_modeling(data):
     data['margin'] = float(data['margin']) / 100
     data['budget'] = float(data['budget'])
+    data['courier_salary'] = float(data['courier_salary'])
     data['expiration_discount'] = float(data['expiration_discount']) / 100
     data['supply_size'] = int(data['supply_size'])
     data['couriers_amount'] = int(data['couriers_amount'])
@@ -31,10 +35,18 @@ def start_modeling(data):
         )
         for i in range(int(data['couriers_amount']))
     ]
-    # try:
-    ExperimentManager(**data).run(date.today(), date.today() + timedelta(90), eel.showProgress)
-    # except Exception as err:
-    #     eel.showError(str(err))
+    ExperimentManager(**data).run(
+        date.fromisoformat(data['date_from']),
+        date.fromisoformat(data['date_to']),
+        eel.showProgress,
+    )
+    eel.showResults(
+        ExperimentConfig().budget - ExperimentConfig().start_budget,
+        Logger().get_delivered_orders_amount(),
+        Logger().get_average_waiting_time(),
+        StorageController().total_price,
+        Logger().logs,
+    )
 
 
 def run():

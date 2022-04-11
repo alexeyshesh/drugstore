@@ -1,5 +1,6 @@
 from app.ctl.provider import ProviderController
 from app.experiment.config import ExperimentConfig
+from app.experiment.logger import Logger
 from app.models.medicine import MedicineItem
 from app.models.order import (
     Order,
@@ -23,16 +24,30 @@ class OrdersController(BaseController):
         for courier in couriers:
             courier_time_left = courier.working_hours
             orders_to_delete = []
+            profit_by_courier = 0
             for order in self.orders_queue:
                 if self.order_in_stock(order) and courier_time_left >= order.delivery_time:
                     courier_time_left -= order.delivery_time
                     items_to_deliver = self.pop_items_to_deliver(order)
                     profit = sum(i.price for i in items_to_deliver)
+                    profit_by_courier += profit
                     ExperimentConfig().budget += profit
                     self.ordered_items = [item for item in self.ordered_items if item.order != order]
                     orders_to_delete.append(order)
 
+            if profit_by_courier:
+                delivery_time = int((courier.working_hours - courier_time_left).seconds / 3600)
+                Logger().add(
+                    f'{courier.name} сегодня доставит {len(orders_to_delete)} заказов на '
+                    f'сумму {profit_by_courier:.2f} рублей! Это займет примерно {delivery_time} часов',
+                    profit=profit_by_courier,
+                )
             for order in orders_to_delete:
+                Logger().add(
+                    '',
+                    meta={'wait_time': (ExperimentConfig().cur_date - order.ordered_at.date()).days},
+                    hidden=True,
+                )
                 self.orders_queue.remove(order)  # потому что процесс доставки/приемки не моделируется
 
     def order_in_stock(self, order: Order) -> bool:

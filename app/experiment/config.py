@@ -3,7 +3,7 @@ from datetime import date
 
 class ExperimentConfig:
 
-    cur_date: date
+    cur_date: date = date.today()
     couriers_amount: int
     margin: float = 0.1
     expiration_discount_days: int = 30
@@ -12,6 +12,9 @@ class ExperimentConfig:
     code_to_medicine: dict = {}
     supply_size: int = 100
     budget: float = 100000
+    start_budget: float = 100000
+    courier_salary: float
+    courier_salary_day: int = 20
 
     __instance = None
 

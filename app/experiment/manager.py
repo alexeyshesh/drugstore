@@ -8,6 +8,7 @@ from app.ctl.couriers import CouriersController
 from app.ctl.orders import OrdersController
 from app.ctl.storage import StorageController
 from app.exceptions import BadExperimentDateRange
+from app.experiment.logger import Logger
 from app.factories.customer import CustomerFactory
 from app.models.medicine import Medicine
 from app.models.courier import Courier
@@ -28,6 +29,7 @@ class ExperimentManager:
         medicines: list[Medicine],
         couriers: list[Courier],
         margin: float,
+        courier_salary: float,
         expiration_discount_days: int = 30,
         expiration_discount: float = 0.5,
         budget: float = 0,
@@ -42,6 +44,8 @@ class ExperimentManager:
 
         exp_conf.margin = margin
         exp_conf.budget = budget
+        exp_conf.start_budget = budget
+        exp_conf.courier_salary = courier_salary
         exp_conf.expiration_discount_days = expiration_discount_days
         exp_conf.expiration_discount = expiration_discount
         exp_conf.cur_date = date.today()
@@ -73,6 +77,7 @@ class ExperimentManager:
         ]
         margin = config_dict.get('margin', margin)
         budget = config_dict.get('budget', 0)
+        courier_salary = config_dict.get('courier_salary', 0)
         supply_size = config_dict.get('supply_size', 100)
         expiration_discount_days = config_dict.get(
             'expiration_discount_days',
@@ -91,19 +96,21 @@ class ExperimentManager:
             expiration_discount=expiration_discount,
             budget=budget,
             supply_size=supply_size,
+            courier_salary=courier_salary,
         )
 
     def run(
         self,
         date_from: date,
         date_to: date,
-        progress_callback: Callable = (lambda x: print(f'Progress: {x}%'))
+        progress_callback: Callable = (lambda x: print(f'Progress: {x}%')),
     ):
         if date_from > date_to:
             raise BadExperimentDateRange()
 
         ExperimentConfig().cur_date = date_from
         period_len = (date_to - date_from).days
+
         for i in range(period_len):
             progress_callback(int(i * 100 / period_len))
             self._run_day()
@@ -113,6 +120,9 @@ class ExperimentManager:
         self.storage_ctl.utilize_expired()
         self.storage_ctl.accept_items_from_provider()
         self.orders_ctl.distribute_orders_to_couriers()
+
+        if ExperimentConfig().cur_date.day == ExperimentConfig().courier_salary_day:
+            CouriersController().pay_salary()
 
         self.create_new_orders()
         self.orders_ctl.make_new_requests()
@@ -158,6 +168,11 @@ class ExperimentManager:
             for med in raw_order:
                 new_ordered_items.append(OrderedItem(med, order))
                 order.total_price += med.retail_price * (1 + ExperimentConfig().margin)
+
+            Logger().add(
+                f'{order.customer.first_name} {order.customer.last_name}'
+                f' заказал {", ".join(med.name for med in raw_order)} на сумму {order.total_price:.2f} рублей',
+            )
 
             new_orders.append(order)
 

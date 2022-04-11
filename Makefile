@@ -1,10 +1,19 @@
-.PHONY: install tests flake run
+.PHONY: install tests flake run install winstall wrun
+
+install:
+	pip3 install -r requirements.txt
+
+winstall:
+	pip install -r requirements.txt
 
 run:
 	python3 manager.py
 
+wrun:
+	python manager.py
+
 tests:
-	coverage run -m pytest ./tests; make clean
+	python3 -m pytest ./tests
 
 coverage:
 	make tests

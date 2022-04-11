@@ -77,6 +77,7 @@ class ExperimentManager:
         ]
         margin = config_dict.get('margin', margin)
         budget = config_dict.get('budget', 0)
+        courier_salary = config_dict.get('courier_salary', 0)
         supply_size = config_dict.get('supply_size', 100)
         expiration_discount_days = config_dict.get(
             'expiration_discount_days',
@@ -95,6 +96,7 @@ class ExperimentManager:
             expiration_discount=expiration_discount,
             budget=budget,
             supply_size=supply_size,
+            courier_salary=courier_salary,
         )
 
     def run(

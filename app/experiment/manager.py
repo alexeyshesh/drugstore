@@ -1,5 +1,6 @@
 from datetime import date, datetime, time, timedelta
 from random import randint
+from typing import Callable
 
 import yaml
 
@@ -31,6 +32,7 @@ class ExperimentManager:
         expiration_discount: float = 0.5,
         budget: float = 0,
         supply_size: int = 100,
+        **kwargs,
     ):
         exp_conf = ExperimentConfig()
 
@@ -91,12 +93,19 @@ class ExperimentManager:
             supply_size=supply_size,
         )
 
-    def run(self, date_from: date, date_to: date):
+    def run(
+        self,
+        date_from: date,
+        date_to: date,
+        progress_callback: Callable = (lambda x: print(f'Progress: {x}%'))
+    ):
         if date_from > date_to:
             raise BadExperimentDateRange()
 
         ExperimentConfig().cur_date = date_from
-        for i in range((date_to - date_from).days):
+        period_len = (date_to - date_from).days
+        for i in range(period_len):
+            progress_callback(int(i * 100 / period_len))
             self._run_day()
             ExperimentConfig().cur_date += timedelta(1)
 

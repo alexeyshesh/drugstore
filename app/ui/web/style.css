@@ -1,0 +1,181 @@
+* {
+    font-family: monospace;
+}
+body {
+    margin: 0;
+    padding: 0;
+}
+input {
+    outline: none !important;
+    border: 1px solid lightgray;
+    padding: 5px;
+    border-radius: 5px;
+}
+div.main {
+    display: grid;
+    grid-template-areas:
+    "common_params meds";
+    grid-template-rows: 100vh;
+    grid-template-columns: 2fr 6fr;
+}
+div.main__common-params {
+    grid-area: common_params;
+    display: flex;
+    flex-direction: column;
+}
+div.main__common-params div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px;
+}
+div.main__common-params h3 {
+    text-align: center;
+}
+div.main__common-params label {
+    margin: 10px;
+}
+div.main__meds {
+    grid-area: meds;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: #F5F5F5;
+    box-shadow: inset 2px 0 8px 0 rgba(34, 60, 80, 0.1);
+    padding: 10px 0 0 0;
+    overflow-y: scroll;
+}
+div.medicine-card {
+    display: grid;
+    grid-template:
+    "med_name med_code med_portion med_price med_formula add_del_btn";
+    border-radius: 10px;
+    padding: 10px 0 10px 10px;
+    margin: 5px 0 10px 0;
+    background-color: white;
+    box-shadow: 0 0 8px rgba(34, 60, 80, 0.1);
+    width: 98%;
+}
+div.medicine-card input {
+    width: 90%;
+}
+div.medicine-card > div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-evenly;
+}
+div.medicine-card div * {
+    margin: 2px;
+}
+div.med_name {grid-area: med_name;}
+div.med_code {grid-area: med_code;}
+div.med_code input {
+    text-transform: uppercase;
+}
+div.med_portion {grid-area: med_portion;}
+div.med_price {grid-area: med_price;}
+div.med_formula {grid-area: med_formula;}
+div.add_del_btn {grid-area: add_del_btn; display: flex; justify-content: center;}
+div.button {
+    border-radius: 10px;
+    padding: 10px;
+    height: fit-content;
+    cursor: pointer;
+    width: fit-content;
+}
+div.button_green {
+    background-color: lightseagreen;
+    color: white;
+}
+div.button_green:hover {
+    background-color: #1a918a;
+}
+div.button_red {
+    background-color: indianred;
+    color: white;
+}
+div.button_red:hover {
+    background-color: #a44a4a;
+    color: white;
+}
+div.start-button {
+    margin-top: fill;
+}
+
+#progressView {
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+#progressBar {
+    width: 20vw;
+}
+
+#resultsView {
+    display: none;
+    grid-template:
+        "stats"
+        "log_header"
+        "logs";
+    grid-template-rows: 20vh 80px;
+    overflow-y: scroll;
+    width: 100vw;
+    height: 100vh;
+    background-color: #F5F5F5;
+}
+div.stats {
+    grid-area: stats;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+div.stats div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    border-radius: 20px;
+    width: 20%;
+    box-shadow: 0 0 8px rgba(34, 60, 80, 0.1);
+}
+div.log_header {
+    grid-area: log_header;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+div.logs {
+    grid-area: logs;
+    background-color: white;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 0 8px rgba(34, 60, 80, 0.1);
+    padding: 20px;
+}
+div.logs > div {
+    margin: 10px;
+}
+div.logs > div > div:hover {
+    background-color: #F5F5F5;
+    border-radius: 5px;
+}
+div.logs > div > * {
+    padding: 10px;
+}
+div.logs > div > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+h1.profit, b.profit {
+    color: lightseagreen;
+}
+h1.loss, b.loss {
+    color: indianred;
+}

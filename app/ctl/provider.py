@@ -23,7 +23,7 @@ class ProviderController(BaseController):
         self.supply_queue[supply_date].extend([
             MedicineItem(
                 medicine=medicine,
-                expires_at=ExperimentConfig().cur_date + timedelta(30),
+                expires_at=ExperimentConfig().cur_date + timedelta(randint(10, 20)),
             )
             for _ in range(ExperimentConfig().supply_size)
         ])
@@ -44,3 +44,7 @@ class ProviderController(BaseController):
                 ExperimentConfig().budget -= (
                     ExperimentConfig().supply_size * ExperimentConfig().code_to_medicine[code].retail_price
                 )
+
+    def reset(self):
+        self.supply_queue = defaultdict(list)
+        self.requested_items = defaultdict(int)

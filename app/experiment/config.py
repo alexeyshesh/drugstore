@@ -15,6 +15,7 @@ class ExperimentConfig:
     start_budget: float = 100000
     courier_salary: float
     courier_salary_day: int = 20
+    date_to: date = None
 
     __instance = None
 

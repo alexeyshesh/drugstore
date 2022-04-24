@@ -31,7 +31,6 @@ class OrdersController(BaseController):
                     items_to_deliver = self.pop_items_to_deliver(order)
                     profit = sum(i.price for i in items_to_deliver)
                     profit_by_courier += profit
-                    ExperimentConfig().budget += profit
                     self.ordered_items = [item for item in self.ordered_items if item.order != order]
                     orders_to_delete.append(order)
 
@@ -40,8 +39,14 @@ class OrdersController(BaseController):
                 Logger().add(
                     f'{courier.name} сегодня доставит {len(orders_to_delete)} заказов на '
                     f'сумму {profit_by_courier:.2f} рублей! Это займет примерно {delivery_time} часов',
-                    profit=profit_by_courier,
                 )
+
+            Logger().add(
+                tag='courier_load',
+                meta={'courier_load': (courier.working_hours - courier_time_left) / courier.working_hours},
+                hidden=True,
+            )
+
             for order in orders_to_delete:
                 Logger().add(
                     '',
@@ -113,8 +118,15 @@ class OrdersController(BaseController):
 
     def pop_items_to_deliver(self, order: Order) -> list[MedicineItem]:
         storage = StorageController()
+        storage.utilize_expired()
+        print('Expired items –', len([i for i in storage.items.values() if i.expires_at < ExperimentConfig().cur_date]))
         return [
             storage.pop_by_code(item.medicine.code)
             for item in self.ordered_items
             if item.order == order
         ]
+
+    def reset(self):
+        self.orders_queue = []
+        self.ordered_items = []
+        self.regular_ordered_items = []

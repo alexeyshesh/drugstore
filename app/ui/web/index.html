@@ -14,7 +14,7 @@
         </div>
         <div>
             <label for="margin">Наценка, %</label>
-            <input type="number" id="margin" value="10" required>
+            <input type="number" id="margin" value="100" required>
         </div>
         <div>
             <label for="expiration_discount">Скидка на просроченные товары, %</label>
@@ -37,9 +37,14 @@
             <label for="salary">Зарплата, ₽</label>
             <input type="number" id="salary" value="10000" required>
         </div>
+        <div>
+            <div></div>
+            <div style="text-align: center">Зарплата выплачивается 20-го числа каждого месяца</div>
+            <div></div>
+        </div>
         <h3>Даты моделирования</h3>
         <div>
-            <label for="date_from">Дата с</label>
+            <label for="date_from">Дата начала моделирования</label>
             <input type="date" id="date_from" value="2022-04-01" required>
         </div>
         <div>
@@ -78,11 +83,24 @@
             <h3>Цена товаров на складе</h3>
             <h1 id="storagePriceValue">-</h1>
         </div>
+        <div>
+            <h3>Загрузка курьеров</h3>
+            <h1 id="courierLoad">-</h1>
+        </div>
+        <div>
+            <h3>Убыток от утилизации просроченных товаров</h3>
+            <h1 id="utilizationLoss">-</h1>
+        </div>
     </div>
     <div class="log_header">
-        <h1>Журнал</h1>
+        <h1>Что случилось</h1>
     </div>
     <div id="logsList" class="logs">
+    </div>
+    <div class="nana">
+        <div class="button button_red" id="startAgain">Начать сначала</div>
+        <div class="button button_green" id="getNextDay">Продолжить</div>
+        <div class="button button_green" id="runUntilComplete">Запустить до конца</div>
     </div>
 </div>
 <script type="text/javascript" src="/eel.js"></script>

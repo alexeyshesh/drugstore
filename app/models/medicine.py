@@ -29,14 +29,14 @@ class MedicineItem:
 
     @property
     def price(self):
-        if date.today() > self.expires_at:
-            raise MedicineItemExpiredError(self)
-        if date.today() + timedelta(ExperimentConfig().expiration_discount_days) >= self.expires_at:
+        if ExperimentConfig().cur_date > self.expires_at:
+            raise MedicineItemExpiredError(self, ExperimentConfig().cur_date)
+        if ExperimentConfig().cur_date + timedelta(ExperimentConfig().expiration_discount_days) >= self.expires_at:
             return reduce(
                 lambda x, y: x * y,
                 [
                     self.medicine.retail_price,
-                    ExperimentConfig().expiration_discount,
+                    (1 - ExperimentConfig().expiration_discount),
                     1 + ExperimentConfig().margin,
                 ],
                 1,

@@ -5,13 +5,17 @@ function showError(err) {
 
 eel.expose(showProgress)
 function showProgress(progress) {
+    document.getElementById('paramsView').style.display = 'none'
+    document.getElementById('progressView').style.display = 'flex'
+    document.getElementById('resultsView').style.display = 'none'
+
     document.getElementById('progressBar').value = progress
     document.getElementById('progressBar').innerText = `${progress}%`
 }
 
 eel.expose(showResults)
-function showResults(profit, ordersDelivered, ordersInProgress, storagePrice, logs) {
-
+function showResults(profit, ordersDelivered, ordersInProgress, storagePrice, logs, couriersLoad, utilizationLoss) {
+    console.log(couriersLoad, utilizationLoss)
     document.getElementById('profitValue').innerText = `${profit.toFixed(2)} ₽`
     if (profit > 0) {
         document.getElementById('profitValue').classList.remove('loss')
@@ -21,8 +25,15 @@ function showResults(profit, ordersDelivered, ordersInProgress, storagePrice, lo
         document.getElementById('profitValue').classList.remove('profit')
     }
     document.getElementById('ordersDeliveredValue').innerText = `${ordersDelivered}`
-    document.getElementById('ordersInProgressValue').innerText = `${ordersInProgress} дней`
+    document.getElementById('ordersInProgressValue').innerText = ordersInProgress === 0 ? '—' : (
+        ordersInProgress === 1 ? `${ordersInProgress} день` : (
+            ordersInProgress < 5 ? `${ordersInProgress} дня` : `${ordersInProgress} дней`))
     document.getElementById('storagePriceValue').innerText = `${storagePrice.toFixed(2)} ₽`
+
+    document.getElementById('courierLoad').innerText = (
+        couriersLoad === -1 ? '—' :
+            `${Math.round(couriersLoad.toFixed(2) * 100)} %`)
+    document.getElementById('utilizationLoss').innerText = `${utilizationLoss.toFixed(2)} ₽`
 
     printLogs(logs)
 
@@ -65,29 +76,36 @@ let medicines = [
         'name': 'Ношпа',
         'code': 'NSP',
         'portion_size': 50,
-        'retail_price': 400,
-        'demand_price_formula': '-price/80 + 10',
+        'retail_price': 300,
+        'demand_price_formula': '-price/100 + 30',
     },
     {
         'name': 'Витамин C',
         'code': 'VTC',
         'portion_size': 100,
         'retail_price': 100,
-        'demand_price_formula': '-price/10 + 20',
+        'demand_price_formula': '-price/10 + 50',
     },
     {
         'name': 'Витамин D',
         'code': 'VTD',
         'portion_size': 100,
         'retail_price': 150,
-        'demand_price_formula': '-price/10 + 30',
+        'demand_price_formula': '-price/10 + 50',
     },
     {
         'name': 'Аспирин',
         'code': 'SPR',
         'portion_size': 100,
         'retail_price': 50,
-        'demand_price_formula': '-price/10 + 20',
+        'demand_price_formula': '-price/10 + 50',
+    },
+    {
+        'name': 'Гематоген',
+        'code': 'GMT',
+        'portion_size': 100,
+        'retail_price': 50,
+        'demand_price_formula': '-price/20 + 50',
     },
 ]
 function drawMedicines() {
@@ -143,7 +161,7 @@ function drawMedicines() {
             </div>
             <div class="med_formula">
                 <label>Формула Demand(price):</label>
-                <input type="text" placeholder="Пример: -price/5+40" id="newMedicineDemandPriceFormula">
+                <input value="-price/10 + 50" type="text" placeholder="Пример: -price/5+40" id="newMedicineDemandPriceFormula">
             </div>
             <div class="add_del_btn">
                 <div class="button button_green" id="addMedicineButton">Добавить</div>
@@ -154,22 +172,68 @@ function drawMedicines() {
     document.getElementById('addMedicineButton').addEventListener('click', addMedicine)
 }
 function addMedicine() {
-    // TODO: валидация
-    medicines.push({
-        'name': document.getElementById('newMedicineName').value,
-        'code': document.getElementById('newMedicineCode').value,
-        'portion_size': document.getElementById('newMedicinePotionSize').value,
-        'retail_price': document.getElementById('newMedicinePrice').value,
-        'demand_price_formula': document.getElementById('newMedicineDemandPriceFormula').value,
-    })
-    drawMedicines()
+    document.getElementById('newMedicineName').style.border = '1px solid lightgray'
+    document.getElementById('newMedicineCode').style.border = '1px solid lightgray'
+    document.getElementById('newMedicinePotionSize').style.border = '1px solid lightgray'
+    document.getElementById('newMedicinePrice').style.border = '1px solid lightgray'
+    document.getElementById('newMedicineDemandPriceFormula').style.border = '1px solid lightgray'
+
+    let valid = true
+    if (document.getElementById('newMedicineName').value === '') {
+        document.getElementById('newMedicineName').style.border = '1px solid red'
+        valid = false
+    }
+
+    if (document.getElementById('newMedicineCode').value === '') {
+        document.getElementById('newMedicineCode').style.border = '1px solid red'
+        valid = false
+    }
+
+    if (
+        document.getElementById('newMedicinePotionSize').value === ''
+        || parseFloat(document.getElementById('newMedicinePotionSize').value) <= 0
+    ) {
+        document.getElementById('newMedicinePotionSize').style.border = '1px solid red'
+        valid = false
+    }
+    if (
+        document.getElementById('newMedicinePrice').value === ''
+        || parseFloat(document.getElementById('newMedicinePrice').value) <= 0
+    ) {
+        document.getElementById('newMedicinePrice').style.border = '1px solid red'
+        valid = false
+    }
+
+    if (document.getElementById('newMedicineDemandPriceFormula').value === '') {
+        document.getElementById('newMedicineDemandPriceFormula').style.border = '1px solid red'
+        valid = false
+    }
+
+    if (valid) {
+        medicines.push({
+            'name': document.getElementById('newMedicineName').value,
+            'code': document.getElementById('newMedicineCode').value,
+            'portion_size': document.getElementById('newMedicinePotionSize').value,
+            'retail_price': document.getElementById('newMedicinePrice').value,
+            'demand_price_formula': document.getElementById('newMedicineDemandPriceFormula').value,
+        })
+        drawMedicines()
+    }
 }
 function removeMedicine(i) {
     medicines.splice(i, 1)
     drawMedicines()
 }
 
-function startModeling() {
+eel.expose(highlightErrors)
+function highlightErrors(errors) {
+    for (let field_name of errors) {
+        document.getElementById(field_name).style.border = '1px solid red'
+    }
+}
+
+function getNextDay() {
+    console.log(medicines)
     let data = {
         'date_from': document.getElementById('date_from').value,
         'date_to': document.getElementById('date_to').value,
@@ -182,11 +246,22 @@ function startModeling() {
         'courier_salary': document.getElementById('salary').value,
         'medicines': medicines,
     }
-    document.getElementById('paramsView').style.display = 'none'
-    document.getElementById('progressView').style.display = 'flex'
-    document.getElementById('resultsView').style.display = 'none'
-    eel.start_modeling(data)
+
+    console.log(data)
+
+    eel.get_next_day(data)
 }
-document.getElementById('startModelingButton').onclick = startModeling
+document.getElementById('startModelingButton').onclick = getNextDay
+document.getElementById('getNextDay').onclick = getNextDay
+
+document.getElementById('runUntilComplete').onclick = () => {
+    eel.run_until_complete()
+    document.getElementById('runUntilComplete').style.display = 'none'
+}
+
+document.getElementById('startAgain').onclick = () => {
+    eel.start_again();
+    window.location.reload()
+}
 
 window.onload = () => drawMedicines()

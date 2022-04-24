@@ -32,6 +32,7 @@ def test_manager_from_yaml():
         'budget': 123000,
         'supply_size': 200,
         'courier_salary': 40000,
+        'date_to': '2022-01-01',
     }
 
     with patch('app.experiment.manager.yaml.safe_load', Mock(return_value=data)):
@@ -50,6 +51,7 @@ def test_manager_from_yaml():
         'budget': 123000,
         'supply_size': 200,
         'courier_salary': 40000,
+        'date_to': '2022-01-01',
     }
 
     assert mngr.inited_with == expected_init_data

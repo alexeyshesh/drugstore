@@ -6,6 +6,7 @@ import yaml
 
 from app.ctl.couriers import CouriersController
 from app.ctl.orders import OrdersController
+from app.ctl.provider import ProviderController
 from app.ctl.storage import StorageController
 from app.exceptions import BadExperimentDateRange
 from app.experiment.logger import Logger
@@ -29,6 +30,7 @@ class ExperimentManager:
         medicines: list[Medicine],
         couriers: list[Courier],
         margin: float,
+        date_to: date,
         courier_salary: float,
         expiration_discount_days: int = 30,
         expiration_discount: float = 0.5,
@@ -50,8 +52,13 @@ class ExperimentManager:
         exp_conf.expiration_discount = expiration_discount
         exp_conf.cur_date = date.today()
         exp_conf.supply_size = supply_size
+        exp_conf.date_to = date_to
 
         CouriersController().couriers = couriers
+
+        Logger().reset()
+        StorageController().reset()
+        ProviderController().reset()
 
     @classmethod
     def from_yaml(
@@ -76,6 +83,7 @@ class ExperimentManager:
             for courier_name, courier_params in config_dict.get('couriers', {}).items()
         ]
         margin = config_dict.get('margin', margin)
+        date_to = config_dict.get('date_to')
         budget = config_dict.get('budget', 0)
         courier_salary = config_dict.get('courier_salary', 0)
         supply_size = config_dict.get('supply_size', 100)
@@ -97,6 +105,7 @@ class ExperimentManager:
             budget=budget,
             supply_size=supply_size,
             courier_salary=courier_salary,
+            date_to=date_to,
         )
 
     def run(
@@ -113,25 +122,22 @@ class ExperimentManager:
 
         for i in range(period_len):
             progress_callback(int(i * 100 / period_len))
-            self._run_day()
-            ExperimentConfig().cur_date += timedelta(1)
+            self.run_day()
 
-    def _run_day(self):
-        self.storage_ctl.utilize_expired()
-        self.storage_ctl.accept_items_from_provider()
-        self.orders_ctl.distribute_orders_to_couriers()
+    def run_day(self):
+        StorageController().utilize_expired()
+        StorageController().accept_items_from_provider()
+        OrdersController().distribute_orders_to_couriers()
 
         if ExperimentConfig().cur_date.day == ExperimentConfig().courier_salary_day:
             CouriersController().pay_salary()
 
         self.create_new_orders()
-        self.orders_ctl.make_new_requests()
+        OrdersController().make_new_requests()
+
+        ExperimentConfig().cur_date += timedelta(1)
 
     def create_new_orders(self):
-        """
-        TODO: Чтобы учесть тот факт, что цена уменьшается при истечении срока годности,
-              нужно сначала разбирать уцененные тоовары, а уже потом формировать остальные заказы
-        """
         max_delivery_time_minutes = max(
             [
                 int(courier.working_hours.seconds / 60)
@@ -143,12 +149,12 @@ class ExperimentManager:
         for med in ExperimentConfig().medicines:
             med: Medicine
             # количество заказанных лекарств вычисляется по форммуле цена-спрос
-            # и умножается на случайный коэф-т от 0.8 до 1.1
+            # и умножается на случайный коэф-т от 0.8 до 1.2
             new_ordered_meds_amount = int(
                 eval(
                     med.demand_formula,
                     {'price': med.retail_price * (1 + ExperimentConfig().margin)},
-                ) * (randint(80, 111) / 100),
+                ) * (randint(8, 12) / 10),
             )
             new_ordered_meds.extend([med for _ in range(new_ordered_meds_amount)])
 
@@ -172,7 +178,9 @@ class ExperimentManager:
             Logger().add(
                 f'{order.customer.first_name} {order.customer.last_name}'
                 f' заказал {", ".join(med.name for med in raw_order)} на сумму {order.total_price:.2f} рублей',
+                profit=order.total_price,
             )
+            ExperimentConfig().budget += order.total_price
 
             new_orders.append(order)
 

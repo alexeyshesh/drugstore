@@ -1,5 +1,3 @@
-from datetime import date
-
 from app.ctl.base import BaseController
 from app.ctl.provider import ProviderController
 from app.exceptions import MedicineNotFound
@@ -45,8 +43,19 @@ class StorageController(BaseController):
     def utilize_expired(self):
         not_expired = {}
         for barcode, item in self.items.items():
-            if item.expires_at >= date.today():
+            if item.expires_at >= ExperimentConfig().cur_date:
                 not_expired[barcode] = item
+        if len(self.items) != len(not_expired):
+            print(
+                f'utilized {len(self.items) - len(not_expired)} items:',
+                ', '.join([code for code in (set(self.items) - set(not_expired))]),
+            )
+            Logger().add(
+                msg='Утилизация просроченнных товаров',
+                tag='utilization',
+                loss=sum(self.items[code].medicine.retail_price for code in (set(self.items) - set(not_expired))),
+            )
+
         self.items = not_expired
 
     def accept_items_from_provider(self):
@@ -61,4 +70,10 @@ class StorageController(BaseController):
 
     @property
     def total_price(self) -> float:
-        return sum(med.price for med in self.items.values())
+        return sum(
+            med.price for med in self.items.values()
+            if med.expires_at >= ExperimentConfig().cur_date
+        )
+
+    def reset(self):
+        self.items = {}
